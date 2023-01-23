@@ -19,9 +19,6 @@ export default defineNuxtConfig({
       },
     },
   },
-  nitro: {
-    preset: "vercel",
-  },
   serverHandlers: [
     {
       route: "/api/express",

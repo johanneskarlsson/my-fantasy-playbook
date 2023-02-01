@@ -1,5 +1,6 @@
 import express from "express";
 import YahooFantasy from "yahoo-fantasy";
+import { stringify } from "querystring";
 
 const app = express();
 
@@ -38,8 +39,23 @@ app.yf = new YahooFantasy(
   process.env.YAHOO_CALLBACK_URL
 );
 
-app.get("/auth/yahoo", (req, res) => {
-  app.yf.auth(res);
+app.get("/auth/yahoo", async (req, res) => {
+  //app.yf.auth(res);
+  const params = {
+    client_id: process.env.YAHOO_CLIENT_ID,
+    redirect_uri: process.env.YAHOO_CALLBACK_URL,
+    response_type: "code",
+  };
+  try {
+    const response = await fetch(
+      `https://api.login.yahoo.com/oauth2/request_auth?${stringify(params)}`
+    );
+    if (200 === response.status) {
+      res.send(response.url); // we send the login page to nuxt, we are going to redirect from there
+    }
+  } catch (e: any) {
+    throw new Error(e);
+  }
 });
 
 app.get("/auth/yahoo/callback", (req, res) => {
@@ -47,7 +63,6 @@ app.get("/auth/yahoo/callback", (req, res) => {
     if (err) {
       return res.redirect("/error");
     }
-
     return res.redirect("/");
   });
 });

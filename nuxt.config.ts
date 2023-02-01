@@ -7,18 +7,8 @@ export default defineNuxtConfig({
       YAHOO_CLIENT_SECRET: process.env.YAHOO_CLIENT_SECRET,
       APP_URL: process.env.APP_URL,
     },
-    proxy: {
-      options: {
-        target: "https://wide-onions-share-81-234-67-16.loca.lt/",
-        changeOrigin: true,
-        pathRewrite: {
-          "^/api/todos": "/todos",
-          "^/api/users": "/users",
-        },
-        pathFilter: ["/api/todos", "/api/users"],
-      },
-    },
   },
+
   serverHandlers: [
     {
       route: "/api/express",
@@ -26,5 +16,6 @@ export default defineNuxtConfig({
       handler: "~/subsystem/express.ts",
     },
   ],
-  modules: ["@pinia/nuxt", "nuxt-proxy"],
+
+  modules: ["@pinia/nuxt", "@pinia-plugin-persistedstate/nuxt"],
 });

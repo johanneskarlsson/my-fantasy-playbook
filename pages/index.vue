@@ -4,7 +4,7 @@
       <AppHeader />
     </div>
     <div class="bg-slate-200 w-full grow py-6 px-6">
-      <h1>Current League: {{ uiStore.currentLeague.name }}</h1>
+      <h1>Current League: {{ uiStore.currentLeague?.name }}</h1>
     </div>
     <div class="bg-slate-200 w-full grow pb-12">
       <button class="button-small-base" @click="login">Login</button>

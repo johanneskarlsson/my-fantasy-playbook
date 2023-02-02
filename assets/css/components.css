@@ -1,0 +1,10 @@
+@layer base {
+    .button-small-base {
+      @apply inline-flex overflow-hidden justify-center items-center text-center rounded-full font-medium text-base h-12 px-6 box-border;
+    }
+  
+    .button-large-base {
+      @apply flex overflow-hidden justify-center items-center text-center rounded-full font-medium text-lg h-15 w-full px-6;
+      min-width: 223px;
+    }
+}

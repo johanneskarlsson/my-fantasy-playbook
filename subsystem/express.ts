@@ -1,6 +1,7 @@
 import express from "express";
 import YahooFantasy from "yahoo-fantasy";
 import { stringify } from "querystring";
+import { forEachChild } from "typescript";
 
 const app = express();
 
@@ -67,9 +68,45 @@ app.get("/auth/yahoo/callback", (req, res) => {
   });
 });
 
-app.get("/yahoo/league/standings", (req, res) => {
-  app.yf.league
-    .standings("nhl.l.17177")
+// ------ GAMES ------- //
+let leagues = [];
+
+app.get("/yahoo/user/leagues", (req, res) => {
+  app.yf.user
+    .game_leagues("nhl")
+    .then((data) => {
+      // do your thing
+      console.log(data.games[0].leagues);
+      leagues = data.games[0].leagues.map((league) => league["league_key"]);
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      // handle error
+      res.status(400).send(err);
+    });
+});
+
+// ------ LEAGUES ------ //
+
+app.get("/yahoo/leagues", (req, res) => {
+  console.log(leagues);
+  app.yf.leagues
+    .fetch(leagues, ["standings"])
+    .then((data) => {
+      // do your thing
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      // handle error
+      res.status(400).send(err);
+    });
+});
+
+// ------ TEAM ------ //
+
+app.get("/yahoo/team/roster", (req, res) => {
+  app.yf.team
+    .roster(req.body)
     .then((data) => {
       // do your thing
       res.status(200).send(data);

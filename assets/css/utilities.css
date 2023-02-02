@@ -1,0 +1,11 @@
+@layer utilities {
+.h-fill {
+    height: 100vh;
+    height: var(--windowInnerHeight);
+  }
+
+  .min-h-fill {
+    min-height: 100vh;
+    min-height: var(--windowInnerHeight);
+  }
+}

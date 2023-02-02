@@ -1,12 +1,9 @@
 import { defineStore } from "pinia";
 
 export const useUserStore = defineStore("user", {
-  persist: true,
-
   state: () => {
     return {
-      user: null,
-      players: [],
+      games: [],
     };
   },
   actions: {
@@ -14,6 +11,17 @@ export const useUserStore = defineStore("user", {
       await $fetch("/api/express/auth/yahoo")
         .then((response) => {
           window.location.href = response; // you get the url of the login page from express, we redirect to it
+        })
+        .catch((e) => {
+          console.log(e);
+          console.log("user not authenticated");
+        });
+    },
+
+    async getGames() {
+      await $fetch("api/express/yahoo/user/leagues")
+        .then((response) => {
+          this.games = response.games[0].leagues;
         })
         .catch((e) => {
           console.log(e);
@@ -43,4 +51,6 @@ export const useUserStore = defineStore("user", {
     //   console.log(user);
     // },
   },
+
+  persist: true,
 });

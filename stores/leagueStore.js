@@ -1,29 +1,32 @@
 import { defineStore } from "pinia";
+import { useUiStore } from "../stores/uiStore";
+
+const uiStore = useUiStore();
 
 export const useLeagueStore = defineStore("league", {
   state: () => {
     return {
-      id: null,
-      name: null,
-      standings: [],
+      leagues: [],
     };
+  },
+  getters: {
+    standings: (state) => {
+      return state.leagues.find(
+        (league) => league.league_id === uiStore.currentLeague.league_id
+      ).standings;
+    },
   },
   actions: {
     async getLeague() {
-      await $fetch("api/express/yahoo/league/standings")
+      await $fetch("api/express/yahoo/leagues")
         .then((response) => {
-          console.log(response);
-          this.id = response.league_id;
-          this.name = response.name;
-          this.standings = response.standings;
+          this.leagues = response;
         })
         .catch((e) => {
           console.log(e);
-          console.log("no league");
+          console.log("user not authenticated");
         });
     },
   },
-  persist: {
-    storage: persistedState.localStorage,
-  },
+  persist: true,
 });

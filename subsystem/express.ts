@@ -1,7 +1,6 @@
 import express from "express";
 import YahooFantasy from "yahoo-fantasy";
 import { stringify } from "querystring";
-import { forEachChild } from "typescript";
 
 const app = express();
 
@@ -41,7 +40,6 @@ app.yf = new YahooFantasy(
 );
 
 app.get("/auth/yahoo", async (req, res) => {
-  //app.yf.auth(res);
   const params = {
     client_id: process.env.YAHOO_CLIENT_ID,
     redirect_uri: process.env.YAHOO_CALLBACK_URL,
@@ -76,7 +74,6 @@ app.get("/yahoo/user/leagues", (req, res) => {
     .game_leagues("nhl")
     .then((data) => {
       // do your thing
-      console.log(data.games[0].leagues);
       leagues = data.games[0].leagues.map((league) => league["league_key"]);
       res.status(200).send(data);
     })
@@ -87,13 +84,16 @@ app.get("/yahoo/user/leagues", (req, res) => {
 });
 
 // ------ LEAGUES ------ //
+let teams = [];
 
 app.get("/yahoo/leagues", (req, res) => {
-  console.log(leagues);
   app.yf.leagues
     .fetch(leagues, ["standings"])
     .then((data) => {
       // do your thing
+      teams = data.flatMap((league) =>
+        league.standings.map((team) => team.team_key)
+      );
       res.status(200).send(data);
     })
     .catch((err) => {
@@ -102,12 +102,14 @@ app.get("/yahoo/leagues", (req, res) => {
     });
 });
 
-// ------ TEAM ------ //
+// ------ TEAMS ------ //
 
-app.get("/yahoo/team/roster", (req, res) => {
-  app.yf.team
-    .roster(req.body)
+app.get("/yahoo/teams", (req, res) => {
+  console.log(teams);
+  app.yf.teams
+    .fetch(teams, ["stats", "roster"])
     .then((data) => {
+      console.log(data);
       // do your thing
       res.status(200).send(data);
     })

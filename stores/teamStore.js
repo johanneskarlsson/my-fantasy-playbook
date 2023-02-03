@@ -3,20 +3,15 @@ import { defineStore } from "pinia";
 export const useTeamStore = defineStore("team", {
   state: () => {
     return {
-      id: null,
-      name: null,
-      roster: [],
+      teams: [],
     };
   },
   actions: {
-    async getRoster(team_key) {
-      await $fetch("api/express/yahoo/team/roster", {
-        method: "POST",
-        body: JSON.stringify(team_key),
-      })
+    async getTeams() {
+      await $fetch("api/express/yahoo/teams")
         .then((response) => {
           console.log(response);
-          this.roster = response.players;
+          this.teams = response;
         })
         .catch((e) => {
           console.log(e);

@@ -4,11 +4,11 @@
   >
     <select @change="setCurrentLeague()" v-model="selectedLeague">
       <option
-        v-for="league in userStore.leagues"
-        :key="league.league_id"
-        :value="league"
+        v-for="game in userStore.games"
+        :key="game.league_id"
+        :value="game"
       >
-        {{ league.name }}
+        {{ game.name }}
       </option>
     </select>
   </header>

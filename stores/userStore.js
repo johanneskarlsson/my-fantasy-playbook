@@ -51,6 +51,4 @@ export const useUserStore = defineStore("user", {
     //   console.log(user);
     // },
   },
-
-  persist: true,
 });

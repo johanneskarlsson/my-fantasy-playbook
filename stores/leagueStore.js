@@ -13,7 +13,7 @@ export const useLeagueStore = defineStore("league", {
     standings: (state) => {
       return state.leagues.find(
         (league) => league.league_id === uiStore.currentLeague.league_id
-      ).standings;
+      )?.standings;
     },
   },
   actions: {

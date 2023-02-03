@@ -10,7 +10,12 @@
       <button class="button-small-base" @click="login">Login</button>
       <button class="button-small-base" @click="getGames">Get games</button>
       <button class="button-small-base" @click="getLeague">Get league</button>
-      <button class="button-small-base" @click="getRoster">Get roster</button>
+      <button class="button-small-base" @click="getTeams">Get roster</button>
+      <NuxtLink to="/league"> League page </NuxtLink>
+    </div>
+    <div v-if="standings" class="bg-slate-200 w-full grow pb-12">
+      Standings
+      <Standings :league="uiStore.currentLeague" :standings="standings" />
     </div>
   </div>
 </template>
@@ -26,6 +31,10 @@ const teamStore = useTeamStore();
 const uiStore = useUiStore();
 const userStore = useUserStore();
 
+const standings = computed(() => {
+  return leagueStore.standings;
+});
+
 const login = () => {
   userStore.login();
 };
@@ -36,13 +45,10 @@ const getGames = () => {
 
 const getLeague = () => {
   leagueStore.getLeague();
-  console.log(leagueStore.leagues);
-  console.log(leagueStore.standings);
 };
 
-const getRoster = () => {
-  teamStore.getRoster("419.l.17177.t.7");
-  console.log(teamStore.Roster);
+const getTeams = () => {
+  teamStore.getTeams();
 };
 
 onMounted(() => {

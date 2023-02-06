@@ -4,23 +4,27 @@
       <AppHeader />
     </div>
     <div class="bg-slate-200 w-full grow py-6 px-6">
-      <h1>Current League: {{ uiStore.currentLeague?.name }}</h1>
+      <h1>Current League: {{ currentLeague?.name }}</h1>
     </div>
     <div class="bg-slate-200 w-full grow pb-12">
       <button class="button-small-base" @click="login">Login</button>
       <button class="button-small-base" @click="getGames">Get games</button>
       <button class="button-small-base" @click="getLeague">Get league</button>
       <button class="button-small-base" @click="getTeams">Get roster</button>
-      <NuxtLink to="/league"> League page </NuxtLink>
+      <NuxtLink to="/league/moves-like-jagr"> Moves Like Jagr page </NuxtLink>
+      <NuxtLink to="/league/moves-like-jagr/team/hintz-for-kids">
+        Hintz for kids page
+      </NuxtLink>
     </div>
     <div v-if="standings" class="bg-slate-200 w-full grow pb-12">
       Standings
-      <Standings :league="uiStore.currentLeague" :standings="standings" />
+      <Standings :league="currentLeague" :standings="standings" />
     </div>
   </div>
 </template>
 
 <script setup>
+import { storeToRefs } from "pinia";
 import { useLeagueStore } from "../stores/leagueStore";
 import { useTeamStore } from "../stores/teamStore";
 import { useUiStore } from "../stores/uiStore";
@@ -31,31 +35,18 @@ const teamStore = useTeamStore();
 const uiStore = useUiStore();
 const userStore = useUserStore();
 
-const standings = computed(() => {
-  return leagueStore.standings;
-});
+const { login, getGames } = userStore;
+const { getLeague } = leagueStore;
+const { getTeams } = teamStore;
 
-const login = () => {
-  userStore.login();
-};
-
-const getGames = () => {
-  userStore.getGames();
-};
-
-const getLeague = () => {
-  leagueStore.getLeague();
-};
-
-const getTeams = () => {
-  teamStore.getTeams();
-};
+const { currentLeague } = storeToRefs(uiStore);
+const { standings } = storeToRefs(leagueStore);
 
 onMounted(() => {
   if (userStore.leagues) {
     uiStore.setCurrentLeague(userStore.leagues[0]);
 
-    console.log(uiStore.currentLeague);
+    console.log(currentLeague);
   }
 });
 </script>

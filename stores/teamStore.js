@@ -1,17 +1,29 @@
-import { defineStore } from "pinia";
+import { defineStore, acceptHMRUpdate } from "pinia";
+import { useStorage } from "@vueuse/core";
+import { slugify } from "~/utils/slugify";
 
-export const useTeamStore = defineStore("team", {
+const useTeamStore = defineStore("team", {
   state: () => {
     return {
-      teams: [],
+      teams: useStorage("teams", []),
     };
+  },
+  getters: {
+    teamBySlug: (state) => (teamSlug) =>
+      state.teams.find((team) => slugify(team.name) === teamSlug),
   },
   actions: {
     async getTeams() {
-      await $fetch("api/express/yahoo/teams")
+      await $fetch("api/express/yahoo/teams/leagues")
         .then((response) => {
-          console.log(response);
-          this.teams = response;
+          console.log("Teams fetched");
+          this.teams = response.flatMap((league) =>
+            league.teams.map((team) => {
+              team.league = league.name;
+              team.league_id = league.league_id;
+              return team;
+            })
+          );
         })
         .catch((e) => {
           console.log(e);
@@ -19,5 +31,10 @@ export const useTeamStore = defineStore("team", {
         });
     },
   },
-  persist: true,
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useTeamStore, import.meta.hot));
+}
+
+export { useTeamStore };

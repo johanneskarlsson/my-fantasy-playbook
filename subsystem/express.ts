@@ -84,16 +84,11 @@ app.get("/yahoo/user/leagues", (req, res) => {
 });
 
 // ------ LEAGUES ------ //
-let teams = [];
-
 app.get("/yahoo/leagues", (req, res) => {
   app.yf.leagues
     .fetch(leagues, ["standings"])
     .then((data) => {
       // do your thing
-      teams = data.flatMap((league) =>
-        league.standings.map((team) => team.team_key)
-      );
       res.status(200).send(data);
     })
     .catch((err) => {
@@ -104,12 +99,10 @@ app.get("/yahoo/leagues", (req, res) => {
 
 // ------ TEAMS ------ //
 
-app.get("/yahoo/teams", (req, res) => {
-  console.log(teams);
+app.get("/yahoo/teams/leagues", (req, res) => {
   app.yf.teams
-    .fetch(teams, ["stats", "roster"])
+    .leagues(leagues, ["roster"])
     .then((data) => {
-      console.log(data);
       // do your thing
       res.status(200).send(data);
     })

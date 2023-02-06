@@ -1,9 +1,10 @@
-import { defineStore } from "pinia";
+import { defineStore, acceptHMRUpdate } from "pinia";
+import { useStorage } from "@vueuse/core";
 
-export const useUiStore = defineStore("ui", {
+const useUiStore = defineStore("ui", {
   state: () => {
     return {
-      currentLeague: null,
+      currentLeague: useStorage("currentLeague", null),
     };
   },
   actions: {
@@ -11,5 +12,10 @@ export const useUiStore = defineStore("ui", {
       this.currentLeague = league;
     },
   },
-  persist: true,
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useUiStore, import.meta.hot));
+}
+
+export { useUiStore };

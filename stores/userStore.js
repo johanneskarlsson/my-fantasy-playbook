@@ -1,5 +1,5 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
-import { useStorage } from "@vueuse/core";
+import { useLocalStorage } from "@vueuse/core";
 
 const useUserStore = defineStore("user", {
   // const games = useStorage("games", ref([]));
@@ -29,7 +29,8 @@ const useUserStore = defineStore("user", {
 
   state: () => {
     return {
-      games: useStorage("games", []),
+      games: useLocalStorage("games", []),
+      userLoggedIn: useLocalStorage("userLoggedIn", false),
     };
   },
   actions: {
@@ -41,6 +42,19 @@ const useUserStore = defineStore("user", {
         .catch((e) => {
           console.log(e);
           console.log("user not authenticated");
+        });
+    },
+
+    async get_tokens(code) {
+      await $fetch(`/api/express/auth/yahoo/callback?code=${code}`)
+        .then((response) => {
+          useLocalStorage("accessToken", response.access_token);
+          this.userLoggedIn = true;
+          navigateTo();
+        })
+        .catch((e) => {
+          console.log(e);
+          console.log("user couldn't get access/refresh tokens");
         });
     },
 

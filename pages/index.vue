@@ -48,5 +48,6 @@ onMounted(() => {
 
     console.log(currentLeague);
   }
+  console.log(localStorage);
 });
 </script>

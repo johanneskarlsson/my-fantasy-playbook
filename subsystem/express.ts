@@ -57,13 +57,44 @@ app.get("/auth/yahoo", async (req, res) => {
   }
 });
 
-app.get("/auth/yahoo/callback", (req, res) => {
-  app.yf.authCallback(req, (err) => {
-    if (err) {
-      return res.redirect("/error");
+app.get("/auth/yahoo/callback", async (req, res) => {
+  // app.yf.authCallback(req, (err) => {
+  //   if (err) {
+  //     return res.redirect("/error");
+  //   }
+  //   return res.redirect("/");
+  // });
+  const tokenData = {
+    client_id: process.env.YAHOO_CLIENT_ID,
+    client_secret: process.env.YAHOO_CLIENT_SECRET,
+    redirect_uri: process.env.YAHOO_CALLBACK_URL,
+    code: req.query.code,
+    grant_type: "authorization_code",
+  };
+
+  try {
+    const response = await fetch(
+      `https://api.login.yahoo.com/oauth2/get_token`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${Buffer.from(
+            `${process.env.YAHOO_CLIENT_ID}:${process.env.YAHOO_CLIENT_SECRET}`
+          ).toString("base64")}`,
+        },
+        body: stringify(tokenData),
+      }
+    );
+
+    if (200 === response.status) {
+      const { access_token, refresh_token, expires_in, token_type } =
+        await response.json();
+      res.json({ access_token, refresh_token, expires_in, token_type }); // we send the access/refresh tokens to nuxt
     }
-    return res.redirect("/");
-  });
+  } catch (e: any) {
+    throw new Error(e);
+  }
 });
 
 // ------ GAMES ------- //

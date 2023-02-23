@@ -1,16 +1,16 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
-import { useStorage } from "@vueuse/core";
 import { slugify } from "~/utils/slugify";
 
 const useTeamStore = defineStore("team", {
   state: () => {
     return {
-      teams: useStorage("teams", []),
+      teams: [],
     };
   },
   getters: {
-    teamBySlug: (state) => (teamSlug) =>
-      state.teams.find((team) => slugify(team.name) === teamSlug),
+    teamBySlug: (state) => (teamSlug) => {
+      return state.teams.find((team) => slugify(team.name) === teamSlug);
+    },
   },
   actions: {
     async getTeams() {
@@ -30,6 +30,9 @@ const useTeamStore = defineStore("team", {
           console.log("user not authenticated");
         });
     },
+  },
+  persist: {
+    storage: persistedState.localStorage,
   },
 });
 

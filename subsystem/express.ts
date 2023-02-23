@@ -58,12 +58,6 @@ app.get("/auth/yahoo", async (req, res) => {
 });
 
 app.get("/auth/yahoo/callback", async (req, res) => {
-  // app.yf.authCallback(req, (err) => {
-  //   if (err) {
-  //     return res.redirect("/error");
-  //   }
-  //   return res.redirect("/");
-  // });
   const tokenData = {
     client_id: process.env.YAHOO_CLIENT_ID,
     client_secret: process.env.YAHOO_CLIENT_SECRET,
@@ -90,6 +84,7 @@ app.get("/auth/yahoo/callback", async (req, res) => {
     if (200 === response.status) {
       const { access_token, refresh_token, expires_in, token_type } =
         await response.json();
+      app.yf.setUserToken(access_token);
       res.json({ access_token, refresh_token, expires_in, token_type }); // we send the access/refresh tokens to nuxt
     }
   } catch (e: any) {
@@ -133,6 +128,21 @@ app.get("/yahoo/leagues", (req, res) => {
 app.get("/yahoo/teams/leagues", (req, res) => {
   app.yf.teams
     .leagues(leagues, ["roster"])
+    .then((data) => {
+      // do your thing
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      // handle error
+      res.status(400).send(err);
+    });
+});
+
+// ------ PLAYERS ------ //
+
+app.get("/yahoo/players/leagues", (req, res) => {
+  app.yf.players
+    .leagues(leagues, { sort: "AR" }, ["stats", "ownership"])
     .then((data) => {
       // do your thing
       res.status(200).send(data);

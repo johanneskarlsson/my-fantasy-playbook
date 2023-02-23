@@ -7,9 +7,16 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="team in props.standings" :key="team" class="h-8">
+      <tr v-for="team in standings" :key="team" class="h-8">
         <td><img :src="team.team_logos[0].url" class="w-8" /></td>
-        <td>{{ team.name }}</td>
+        <td>
+          <NuxtLink
+            :to="`/league/${slugify(props.league.name)}/team/${slugify(
+              team.name
+            )}`"
+            >{{ team.name }}</NuxtLink
+          >
+        </td>
         <td>
           {{
             team.league_scoring_type == "point"
@@ -26,20 +33,14 @@
 </template>
 
 <script setup>
+import { slugify } from "~/utils/slugify";
+
 const props = defineProps({
   league: Object,
-  standings: Object,
 });
+const standings = computed(() => props.league.standings || []);
 
 function calculatePoints(wins, ties) {
   return parseInt(wins * 2) + parseInt(ties);
 }
-
-watch(
-  () => props.standings,
-  (newValue) => {
-    console.log(newValue);
-  }
-);
-console.log(props.standings);
 </script>

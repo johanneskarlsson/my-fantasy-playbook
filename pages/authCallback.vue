@@ -11,6 +11,6 @@ const userStore = useUserStore();
 
 onMounted(() => {
   const code = route.query.code;
-  userStore.get_tokens(code);
+  userStore.getTokens(code);
 });
 </script>

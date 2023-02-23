@@ -1,10 +1,7 @@
 <template>
   <div class="flex flex-col grow bg-white min-h-fill">
-    <div class="bg-slate-300 w-full flex shrink-0 flex-col items-center">
-      <AppHeader />
-    </div>
     <div class="bg-slate-200 w-full grow py-6 px-6">
-      <h1>Current League: {{ currentLeague?.name }}</h1>
+      <h1>Current League: {{ uiStore.currentLeague?.name }}</h1>
     </div>
     <div class="bg-slate-200 w-full grow pb-12">
       <button class="button-small-base" @click="login">Login</button>
@@ -16,15 +13,10 @@
         Hintz for kids page
       </NuxtLink>
     </div>
-    <div v-if="standings" class="bg-slate-200 w-full grow pb-12">
-      Standings
-      <Standings :league="currentLeague" :standings="standings" />
-    </div>
   </div>
 </template>
 
 <script setup>
-import { storeToRefs } from "pinia";
 import { useLeagueStore } from "../stores/leagueStore";
 import { useTeamStore } from "../stores/teamStore";
 import { useUiStore } from "../stores/uiStore";
@@ -39,15 +31,9 @@ const { login, getGames } = userStore;
 const { getLeague } = leagueStore;
 const { getTeams } = teamStore;
 
-const { currentLeague } = storeToRefs(uiStore);
-const { standings } = storeToRefs(leagueStore);
-
 onMounted(() => {
-  if (userStore.leagues) {
-    uiStore.setCurrentLeague(userStore.leagues[0]);
-
-    console.log(currentLeague);
+  if (userStore.games) {
+    uiStore.setCurrentLeague(userStore.games[0]);
   }
-  console.log(localStorage);
 });
 </script>

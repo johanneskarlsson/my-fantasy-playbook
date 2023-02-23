@@ -1,6 +1,5 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
 import { useUiStore } from "../stores/uiStore";
-import { useStorage } from "@vueuse/core";
 import { slugify } from "~/utils/slugify";
 
 const uiStore = useUiStore();
@@ -8,16 +7,14 @@ const uiStore = useUiStore();
 const useLeagueStore = defineStore("league", {
   state: () => {
     return {
-      leagues: useStorage("leagues", []),
+      leagues: [],
     };
   },
   getters: {
-    leagueBySlug(state) {
-      return (leagueSlug) => {
-        return state.leagues.find(
-          (league) => slugify(league.name) === leagueSlug
-        );
-      };
+    leagueBySlug: (state) => (leagueSlug) => {
+      return state.leagues.find(
+        (league) => slugify(league.name) === leagueSlug
+      );
     },
 
     // standings: (state) => {
@@ -35,9 +32,12 @@ const useLeagueStore = defineStore("league", {
         })
         .catch((e) => {
           console.log(e);
-          console.log("user not authenticated");
+          console.log("Couldn't fetch leagues");
         });
     },
+  },
+  persist: {
+    storage: persistedState.localStorage,
   },
 });
 

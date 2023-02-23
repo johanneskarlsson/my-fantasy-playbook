@@ -2,42 +2,16 @@ import { defineStore, acceptHMRUpdate } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 
 const useUserStore = defineStore("user", {
-  // const games = useStorage("games", ref([]));
-
-  // async function login() {
-  //   await $fetch("/api/express/auth/yahoo")
-  //     .then((response) => {
-  //       window.location.href = response; // you get the url of the login page from express, we redirect to it
-  //     })
-  //     .catch((e) => {
-  //       console.log(e);
-  //       console.log("user not authenticated");
-  //     });
-  // }
-
-  // async function getGames() {
-  //   await $fetch("api/express/yahoo/user/leagues")
-  //     .then((response: any) => {
-  //       console.log("Games fetched");
-  //       games.value = response.games[0].leagues;
-  //     })
-  //     .catch((e) => {
-  //       console.log(e);
-  //       console.log("user not authenticated");
-  //     });
-  // }
-
   state: () => {
     return {
-      games: useLocalStorage("games", []),
-      userLoggedIn: useLocalStorage("userLoggedIn", false),
+      games: null,
     };
   },
   actions: {
     async login() {
       await $fetch("/api/express/auth/yahoo")
         .then((response) => {
-          window.location.href = response; // you get the url of the login page from express, we redirect to it
+          window.location.href = response;
         })
         .catch((e) => {
           console.log(e);
@@ -45,11 +19,10 @@ const useUserStore = defineStore("user", {
         });
     },
 
-    async get_tokens(code) {
+    async getTokens(code) {
       await $fetch(`/api/express/auth/yahoo/callback?code=${code}`)
         .then((response) => {
-          useLocalStorage("accessToken", response.access_token);
-          this.userLoggedIn = true;
+          useLocalStorage("accessToken", { token: response.access_token });
           navigateTo();
         })
         .catch((e) => {
@@ -62,36 +35,36 @@ const useUserStore = defineStore("user", {
       await $fetch("api/express/yahoo/user/leagues")
         .then((response) => {
           console.log("Games fetched");
-          this.games = response.games[0].leagues;
+          this.games = response.games[0].leagues.map((league) => {
+            return { name: league.name, league_id: league.league_id };
+          });
         })
         .catch((e) => {
           console.log(e);
           console.log("user not authenticated");
         });
     },
+
+    // async logout() {
+    //   await $fetch("/api/logout")
+    //     .then((response) => {
+    //       if (response.status !== 200) {
+    //         throw new Error(response.status);
+    //       }
+
+    //       return dispatch({
+    //         type: USER_LOG_OUT,
+    //       });
+    //     })
+    //     .catch((e) => {
+    //       console.log("user couldn't log out");
+    //     });
+    //   this.user = null;
+    // },
   },
-
-  // async logout() {
-  //   await $fetch("/api/logout")
-  //     .then((response) => {
-  //       if (response.status !== 200) {
-  //         throw new Error(response.status);
-  //       }
-
-  //       return dispatch({
-  //         type: USER_LOG_OUT,
-  //       });
-  //     })
-  //     .catch((e) => {
-  //       console.log("user couldn't log out");
-  //     });
-  //   this.user = null;
-  // },
-
-  // async getUser() {
-  //   const user = await yahooFantasyRequests.auth();
-  //   console.log(user);
-  // },
+  persist: {
+    storage: persistedState.localStorage,
+  },
 });
 
 if (import.meta.hot) {

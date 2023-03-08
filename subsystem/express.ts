@@ -4,24 +4,6 @@ import { stringify } from "querystring";
 
 const app = express();
 
-app.tokenCallback = function ({ access_token, refresh_token }) {
-  return new Promise((resolve, reject) => {
-    // client is redis client
-    // client.set("accessToken", access_token, (err, res) => {
-    //   // could probably handle this with a multi...
-    //   // and you know... handle the errors...
-    //   // good thing this is only an example!
-    //   client.set("accessToken", access_token, (err, res) => {
-    //     return resolve();
-    //   })
-    // })
-    console.log(
-      `access_token: ${access_token}; refresh_token: ${refresh_token}`
-    );
-    return resolve(null);
-  });
-};
-
 app.get("/", (req, res) => {
   res.json({
     text: "hello from express",
@@ -35,7 +17,7 @@ app.get("/:name", (req, res) => {
 app.yf = new YahooFantasy(
   process.env.YAHOO_CLIENT_ID, // Yahoo! Application Key
   process.env.YAHOO_CLIENT_SECRET, // Yahoo! Application Secret
-  app.tokenCallback,
+  null,
   process.env.YAHOO_CALLBACK_URL
 );
 
@@ -92,6 +74,39 @@ app.get("/auth/yahoo/callback", async (req, res) => {
   }
 });
 
+app.get("/auth/yahoo/refresh_token", async (req, res) => {
+  const refreshData = stringify({
+    grant_type: "refresh_token",
+    redirect_uri: process.env.YAHOO_CALLBACK_URL,
+    refresh_token: req.headers.authorization, // we get the refresh token from nuxt localstorage that we pass on the header
+  });
+
+  try {
+    const response = await fetch(
+      `https://api.login.yahoo.com/oauth2/get_token`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${Buffer.from(
+            `${process.env.YAHOO_CLIENT_ID}:${process.env.YAHOO_CLIENT_SECRET}`
+          ).toString("base64")}`,
+        },
+        body: refreshData,
+      }
+    );
+
+    if (200 === response.status) {
+      const { access_token, refresh_token, expires_in, token_type } =
+        await response.json();
+      app.yf.setUserToken(access_token);
+      res.json({ access_token, refresh_token, expires_in, token_type }); // we send the access/refresh tokens to nuxt
+    }
+  } catch (e: any) {
+    throw new Error(e);
+  }
+});
+
 // ------ GAMES ------- //
 let leagues = [];
 
@@ -104,12 +119,57 @@ app.get("/yahoo/user/leagues", (req, res) => {
       res.status(200).send(data);
     })
     .catch((err) => {
+      console.log(err);
       // handle error
       res.status(400).send(err);
     });
 });
 
 // ------ LEAGUES ------ //
+app.get("/yahoo/league/meta", (req, res) => {
+  const league_key = req.headers.league_key;
+  app.yf.league
+    .meta(league_key)
+    .then((data) => {
+      // do your thing
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      console.log(err);
+      // handle error
+      res.status(400).send(err);
+    });
+});
+app.get("/yahoo/league/standings", (req, res) => {
+  const league_key = req.headers.league_key;
+  app.yf.league
+    .standings(league_key)
+    .then((data) => {
+      // do your thing
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      console.log(err);
+      // handle error
+      res.status(400).send(err);
+    });
+});
+
+app.get("/yahoo/league/settings", (req, res) => {
+  const league_key = req.headers.league_key;
+  app.yf.league
+    .settings(league_key)
+    .then((data) => {
+      // do your thing
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      console.log(err);
+      // handle error
+      res.status(400).send(err);
+    });
+});
+
 app.get("/yahoo/leagues", (req, res) => {
   app.yf.leagues
     .fetch(leagues, ["standings"])
@@ -118,6 +178,7 @@ app.get("/yahoo/leagues", (req, res) => {
       res.status(200).send(data);
     })
     .catch((err) => {
+      console.log(err);
       // handle error
       res.status(400).send(err);
     });
@@ -125,14 +186,31 @@ app.get("/yahoo/leagues", (req, res) => {
 
 // ------ TEAMS ------ //
 
-app.get("/yahoo/teams/leagues", (req, res) => {
-  app.yf.teams
-    .leagues(leagues, ["roster"])
+app.get("/yahoo/team/meta", (req, res) => {
+  const team_key = req.headers.team_key;
+  app.yf.team
+    .meta(team_key)
     .then((data) => {
       // do your thing
       res.status(200).send(data);
     })
     .catch((err) => {
+      console.log(err);
+      // handle error
+      res.status(400).send(err);
+    });
+});
+
+app.get("/yahoo/team/roster", (req, res) => {
+  const team_key = req.headers.team_key;
+  app.yf.team
+    .roster(team_key)
+    .then((data) => {
+      // do your thing
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      console.log(err);
       // handle error
       res.status(400).send(err);
     });
@@ -148,6 +226,7 @@ app.get("/yahoo/players/leagues", (req, res) => {
       res.status(200).send(data);
     })
     .catch((err) => {
+      console.log(err);
       // handle error
       res.status(400).send(err);
     });

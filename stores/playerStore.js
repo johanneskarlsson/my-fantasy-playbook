@@ -1,5 +1,9 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
+import { useUiStore } from "../stores/uiStore";
 import { slugify } from "~/utils/slugify";
+import { yahooFetch } from "~/utils/yahooFetch";
+
+const uiStore = useUiStore();
 
 const usePlayerStore = defineStore("player", {
   state: () => {
@@ -10,23 +14,20 @@ const usePlayerStore = defineStore("player", {
   getters: {
     playerBySlug: (state) => (playerSlug) => {
       return state.players.find(
-        (player) => slugify(player.name) === playerSlug
+        (player) => slugify(player.name.full) === playerSlug
       );
     },
   },
   actions: {
     async getPlayers() {
-      await $fetch("api/express/yahoo/players/leagues")
+      await yahooFetch("players/leagues")
         .then((response) => {
           console.log("Players fetched");
-          console.log(response);
-          //   this.teams = response.flatMap((league) =>
-          //     league.teams.map((team) => {
-          //       team.league = league.name;
-          //       team.league_id = league.league_id;
-          //       return team;
-          //     })
-          //   );
+          response.forEach((league) => {
+            if (league.league_id === uiStore.currentLeague.league_id) {
+              this.players = league.players;
+            }
+          });
         })
         .catch((e) => {
           console.log(e);

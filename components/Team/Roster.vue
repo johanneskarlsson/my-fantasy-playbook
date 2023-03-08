@@ -9,11 +9,11 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="player in roster" :key="player" class="h-8">
+      <tr v-for="player in props.roster" :key="player" class="h-8">
         <td><img :src="player.image_url" class="w-8" /></td>
-        <td>
-          {{ player.name.full }}
-        </td>
+        <NuxtLink :to="`/players/${slugify(player.name.full)}`">{{
+          player.name.full
+        }}</NuxtLink>
         <td>
           {{ player.eligible_positions.join(", ") }}
         </td>
@@ -28,9 +28,6 @@
 import { slugify } from "~/utils/slugify";
 
 const props = defineProps({
-  team: Object,
+  roster: Object,
 });
-console.log(props.team);
-
-const roster = computed(() => props.team.roster);
 </script>

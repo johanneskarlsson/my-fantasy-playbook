@@ -1,5 +1,5 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
-import { useLocalStorage } from "@vueuse/core";
+import { yahooFetch } from "~/utils/yahooFetch";
 
 const useUserStore = defineStore("user", {
   state: () => {
@@ -22,7 +22,8 @@ const useUserStore = defineStore("user", {
     async getTokens(code) {
       await $fetch(`/api/express/auth/yahoo/callback?code=${code}`)
         .then((response) => {
-          useLocalStorage("accessToken", { token: response.access_token });
+          localStorage.setItem("accessToken", response.access_token);
+          localStorage.setItem("refreshToken", response.refresh_token);
           navigateTo();
         })
         .catch((e) => {
@@ -31,12 +32,32 @@ const useUserStore = defineStore("user", {
         });
     },
 
+    async refreshTokens() {
+      const refreshToken = localStorage.getItem("refreshToken"); // not sure how this works, but we need to get refresh token from localstorage
+      await $fetch(`/api/express/auth/yahoo/refresh_token`, {
+        headers: { authorization: refreshToken },
+      })
+        .then((response) => {
+          console.log("refreshed tokens");
+          localStorage.setItem("accessToken", response.access_token);
+          localStorage.setItem("refreshToken", response.refresh_token);
+        })
+        .catch((e) => {
+          console.log(e);
+          console.log("user couldn't refresh access/refresh tokens");
+        });
+    },
+
     async getGames() {
-      await $fetch("api/express/yahoo/user/leagues")
+      await yahooFetch("user/leagues")
         .then((response) => {
           console.log("Games fetched");
           this.games = response.games[0].leagues.map((league) => {
-            return { name: league.name, league_id: league.league_id };
+            return {
+              name: league.name,
+              league_id: league.league_id,
+              league_key: league.league_key,
+            };
           });
         })
         .catch((e) => {

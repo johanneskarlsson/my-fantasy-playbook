@@ -1,8 +1,7 @@
 <template>
   <div class="flex flex-col grow bg-white min-h-fill">
-    <h1>{{ league.name }}</h1>
     <div class="bg-slate-200 w-full grow pb-12">
-      <Standings :league="league" />
+      <LeagueStandings :meta="meta" :standings="standings" />
     </div>
   </div>
 </template>
@@ -14,7 +13,6 @@ const leagueStore = useLeagueStore();
 
 const route = useRoute();
 
-const league = computed(() =>
-  leagueStore.leagueBySlug(route.params.leagueSlug)
-);
+const meta = computed(() => leagueStore.meta);
+const standings = computed(() => leagueStore.standings);
 </script>

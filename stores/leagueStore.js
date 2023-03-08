@@ -1,38 +1,58 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
 import { useUiStore } from "../stores/uiStore";
-import { slugify } from "~/utils/slugify";
-
-const uiStore = useUiStore();
+import { yahooFetch } from "~/utils/yahooFetch";
 
 const useLeagueStore = defineStore("league", {
   state: () => {
     return {
-      leagues: [],
+      meta: null,
+      settings: null,
+      standings: null,
     };
   },
-  getters: {
-    leagueBySlug: (state) => (leagueSlug) => {
-      return state.leagues.find(
-        (league) => slugify(league.name) === leagueSlug
-      );
-    },
-
-    // standings: (state) => {
-    //   return state.leagues.find(
-    //     (league) => league.league_id === uiStore.currentLeague.league_id
-    //   )?.standings;
-    // },
-  },
   actions: {
-    async getLeague() {
-      await $fetch("api/express/yahoo/leagues")
+    getLeague() {
+      this.getLeagueMeta();
+      this.getLeagueSettings();
+      this.getLeagueStandings();
+    },
+    async getLeagueMeta() {
+      await yahooFetch("league/meta", {
+        headers: { league_key: useUiStore().currentLeague.league_key },
+      })
         .then((response) => {
-          console.log("Leagues fetched");
-          this.leagues = response;
+          console.log("Meta fetched");
+          this.meta = response;
         })
         .catch((e) => {
           console.log(e);
-          console.log("Couldn't fetch leagues");
+          console.log("user not authenticated");
+        });
+    },
+    async getLeagueSettings() {
+      await yahooFetch("league/settings", {
+        headers: { league_key: useUiStore().currentLeague.league_key },
+      })
+        .then((response) => {
+          console.log("Settings fetched");
+          this.settings = response.settings;
+        })
+        .catch((e) => {
+          console.log(e);
+          console.log("user not authenticated");
+        });
+    },
+    async getLeagueStandings() {
+      await yahooFetch("league/standings", {
+        headers: { league_key: useUiStore().currentLeague.league_key },
+      })
+        .then((response) => {
+          console.log("Standings fetched");
+          this.standings = response.standings;
+        })
+        .catch((e) => {
+          console.log(e);
+          console.log("user not authenticated");
         });
     },
   },

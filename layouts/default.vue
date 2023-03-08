@@ -16,13 +16,7 @@
               {{ game.name }}
             </option>
           </select>
-          <button
-            class="button-small-base"
-            @click="token ? logoutOfYahoo() : login()"
-          >
-            hello
-            {{ token ? Logout : Login }}
-          </button>
+          <button class="button-small-base" @click="login()">Login</button>
         </header>
       </div>
       <slot />
@@ -31,36 +25,13 @@
 </template>
 
 <script setup>
-import { useLeagueStore } from "../stores/leagueStore";
-import { usePlayerStore } from "../stores/playerStore";
-import { useTeamStore } from "../stores/teamStore";
 import { useUiStore } from "../stores/uiStore";
 import { useUserStore } from "../stores/userStore";
 
-const leagueStore = useLeagueStore();
-const playerStore = usePlayerStore();
-const teamStore = useTeamStore();
 const uiStore = useUiStore();
 const userStore = useUserStore();
 
-const { login, getGames } = userStore;
-const { getLeague } = leagueStore;
-const { getPlayers } = playerStore;
-const { getTeams } = teamStore;
-
-onMounted(async () => {
-  // fetch Yahoo data if logged in
-  await getGames();
-  await getLeague();
-  await getTeams();
-  await getPlayers();
-});
-
-const logoutOfYahoo = () => {
-  if (!process.server) {
-    localStorage.clear();
-  }
-};
+const { login } = userStore;
 
 const selectedLeague = ref(null);
 const setCurrentLeague = () => {
